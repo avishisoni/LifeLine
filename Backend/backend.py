@@ -5,9 +5,16 @@ from typing import Optional, List
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 
+
+
 app = FastAPI()
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="192.168.1.4", port=8001, reload=True)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -28,9 +35,6 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 # SQLite DB
 engine = create_engine("sqlite:///donors.db")
 
-# -------------------------
-# Database Models
-# -------------------------
 
 class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -46,10 +50,6 @@ class Campaign(SQLModel):
     location: str
     time: str
     status: str
-
-# -------------------------
-# Utility Functions
-# -------------------------
 
 def create_db():
     SQLModel.metadata.create_all(engine)
@@ -86,9 +86,6 @@ def get_current_user(token: str = Depends(oauth2_scheme), session: Session = Dep
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-# -------------------------
-# API Endpoints
-# -------------------------
 
 @app.post("/register")
 def register(email: str, username: str, password: str, session: Session = Depends(get_session)):
